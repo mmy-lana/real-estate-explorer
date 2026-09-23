@@ -5,7 +5,6 @@ import {
   type PriceDistributionBucket,
   type PropertyListing,
 } from "../types";
-import { INITIAL_LISTINGS } from "../lib/seed-data";
 import {
   applyListingFilters,
   countListingsWithinBounds,
@@ -21,14 +20,15 @@ import { summarizePriceBuckets } from "../lib/histogram-calculator";
  *
  * The hook is pure with respect to its inputs — it never mutates the repository
  * and memoises on the filter state, so a debounced filter change costs exactly
- * one engine pass.
+ * one engine pass. The repository is injected by the caller so the seed module
+ * can stay behind a dynamic import (see `App.tsx`).
  */
 
 export interface UseListingsQueryOptions {
   /** Debounced filter state to apply. */
   filters: FilterState;
-  /** Repository to query. Defaults to the seeded in-memory repository. */
-  source?: readonly PropertyListing[];
+  /** Repository to query. */
+  source: readonly PropertyListing[];
   /** Renders 12 wider histogram buckets instead of 28. */
   isMobileHistogram?: boolean;
 }
@@ -67,7 +67,7 @@ export function useListingsQuery(
 ): UseListingsQueryResult {
   const {
     filters,
-    source = INITIAL_LISTINGS,
+    source,
     isMobileHistogram = false,
   } = options;
 

@@ -56,8 +56,6 @@
   --animate-fade-in: fade-in 180ms var(--ease-emphasized);
   --animate-scale-in: scale-in 200ms var(--ease-emphasized);
   --animate-rise-in: rise-in 260ms var(--ease-sheet);
-  --animate-sheet-up: sheet-up 320ms var(--ease-sheet);
-  --animate-pin-drop: pin-drop 220ms var(--ease-emphasized);
 
   @keyframes fade-in {
     from {
@@ -89,34 +87,7 @@
       transform: translate3d(0, 0, 0);
     }
   }
-
-  @keyframes sheet-up {
-    from {
-      transform: translate3d(0, 100%, 0);
-    }
-    to {
-      transform: translate3d(0, 0, 0);
-    }
-  }
-
-  @keyframes pin-drop {
-    from {
-      opacity: 0;
-      transform: translate3d(0, -8px, 0) scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-  }
 }
-
-/* Below 390px: small Android tier (Galaxy A-series) */
-@custom-variant mini (@media (width < 24.375rem));
-/* Tablet portrait: 2-column grid tier */
-@custom-variant tablet (@media (width >= 48rem));
-/* Split explorer view: sticky map column beside the grid */
-@custom-variant split (@media (width >= 64rem));
 
 /* --------------------------------------------------------------------------
  * Base layer
@@ -212,15 +183,3 @@
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem);
 }
 
-@utility pt-safe {
-  padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
-}
-
-/* Horizontal snap rail used by the property-type selector and amenity chips. */
-@utility snap-rail {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}

@@ -8,7 +8,6 @@ import {
 } from "../types";
 import { APP_CONFIG } from "../lib/config";
 import { readStorageList } from "../lib/storage";
-import { INITIAL_LISTINGS } from "../lib/seed-data";
 import { useLocalStorage } from "./useLocalStorage";
 
 /**
@@ -19,6 +18,9 @@ import { useLocalStorage } from "./useLocalStorage";
  * synchronously from storage (sanitised member by member, so one corrupt entry
  * cannot discard the collection), which means hearts never flash the wrong state
  * on first paint.
+ *
+ * The repository is injected rather than imported so the seed module can stay
+ * behind a dynamic import; saved ids always resolve as soon as it arrives.
  */
 
 export interface UseFavoritesOptions {
@@ -53,21 +55,23 @@ function readInitialFavorites(): UserFavoriteRecord[] {
   );
 }
 
+/** Stable validator identity, so the persistence hook never re-hydrates needlessly. */
+function isFavoriteRecordList(value: unknown): value is UserFavoriteRecord[] {
+  return Array.isArray(value) && value.every(isValidUserFavoriteRecord);
+}
+
 export function useFavorites(
   options: UseFavoritesOptions = {},
 ): UseFavoritesResult {
   const {
-    listings = INITIAL_LISTINGS,
+    listings = [],
     folderName = APP_CONFIG.storage.defaultFavoriteFolder,
   } = options;
 
   const [favorites, setFavorites] = useLocalStorage<UserFavoriteRecord[]>(
     STORAGE_KEYS.FAVORITES,
     readInitialFavorites(),
-    {
-      validate: (value): value is UserFavoriteRecord[] =>
-        Array.isArray(value) && value.every(isValidUserFavoriteRecord),
-    },
+    { validate: isFavoriteRecordList },
   );
 
   const favoriteIds = useMemo(

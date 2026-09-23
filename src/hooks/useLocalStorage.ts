@@ -59,9 +59,18 @@ export function useLocalStorage<T>(
   const senderIdRef = useRef<string>(createSenderId());
   const channelRef = useRef<BroadcastChannel | null>(null);
 
+  // The validator is read through a ref so a caller passing an inline function
+  // (a new identity every render) cannot invalidate `readValue` and re-run the
+  // hydration effect on each pass — which would loop: hydrate → new array
+  // identity → re-render → hydrate again.
+  const validateRef = useRef(validate);
+  useEffect(() => {
+    validateRef.current = validate;
+  });
+
   const readValue = useCallback((): T => {
-    return readStorageJson<T>(key, initialValueRef.current, validate);
-  }, [key, validate]);
+    return readStorageJson<T>(key, initialValueRef.current, validateRef.current);
+  }, [key]);
 
   const [storedValue, setStoredValue] = useState<T>(readValue);
   const valueRef = useRef<T>(storedValue);
