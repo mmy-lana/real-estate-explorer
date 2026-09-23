@@ -248,11 +248,11 @@ export function InteractiveMap({
           break;
         case "ArrowLeft":
           event.preventDefault();
-          applyViewport(engine.panBy(step, 0));
+          applyViewport(engine.panBy(-step, 0));
           break;
         case "ArrowRight":
           event.preventDefault();
-          applyViewport(engine.panBy(-step, 0));
+          applyViewport(engine.panBy(step, 0));
           break;
         case "+":
         case "=":
@@ -352,8 +352,9 @@ export function InteractiveMap({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
           onKeyDown={handleKeyDown}
-          className="absolute inset-0 touch-none focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-ink"
+          className="absolute inset-0 touch-none focus-visible:outline-2 focus-visible:outline-offset-4px] focus-visible:outline-ink"
         >
           {/* Stylised terrain: subtle grid + landmass wash, drawn with CSS only. */}
           <div

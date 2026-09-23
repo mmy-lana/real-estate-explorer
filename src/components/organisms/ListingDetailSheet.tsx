@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bath,
   Bed,
@@ -77,6 +77,11 @@ export function ListingDetailSheet({
 }: ListingDetailSheetProps): React.JSX.Element | null {
   const isMobileLayout = useIsMobileLayout();
   const [requestSummary, setRequestSummary] = useState<string | null>(null);
+
+  // Clear stale booking confirmation if the user modifies stay parameters or switches listings.
+  useEffect(() => {
+    setRequestSummary(null);
+  }, [listing?.id, checkInDate, checkOutDate, guestCount]);
 
   if (!listing) return null;
 
