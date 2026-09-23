@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { ArrowLeft, List } from "lucide-react";
+import { useFocusTrap, useScrollLock } from "../../hooks/useFocusTrap";
 import { cn, formatPlural } from "../../lib/utils";
 
 export interface MobileMapOverlayProps {
@@ -30,10 +32,19 @@ export function MobileMapOverlay({
   onClearBounds,
   className,
 }: MobileMapOverlayProps): React.JSX.Element | null {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useFocusTrap(containerRef, { active: isOpen, onEscape: onClose });
+  useScrollLock(isOpen);
+
   if (!isOpen) return null;
 
   return (
     <div
+      ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Map view"
       className={cn(
         "fixed inset-0 z-40 flex flex-col bg-surface lg:hidden",
         "animate-fade-in",

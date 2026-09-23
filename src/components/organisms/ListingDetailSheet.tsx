@@ -17,6 +17,7 @@ import type { Amenity, PropertyListing } from "../../types";
 import { AMENITY_LABELS, PROPERTY_TYPE_LABELS } from "../../types";
 import { AMENITY_GROUPS, AMENITY_ICONS } from "../../lib/icon-registry";
 import { useIsMobileLayout } from "../../hooks/useMediaQuery";
+import { isListingAvailable } from "../../lib/filter-engine";
 import { computeStayFromDates } from "../../lib/pricing";
 import {
   cn,
@@ -84,7 +85,12 @@ export function ListingDetailSheet({
   const requestedNights = nightsBetween(checkInDate, checkOutDate);
   const hasStayWindow = requestedNights > 0;
   const isBelowMinimum = stay.isBelowMinimumStay;
-  const canReserve = hasStayWindow && !isBelowMinimum;
+  const isDateAvailable = isListingAvailable(listing, checkInDate, checkOutDate);
+  const canReserve = hasStayWindow && !isBelowMinimum && isDateAvailable;
+  // `isListingAvailable` also rejects a below-minimum window, so the blackout
+  // copy is scoped to the case where a valid-length window really does collide
+  // with a host block — otherwise a short window would blame the calendar.
+  const isBlockedByHost = hasStayWindow && !isBelowMinimum && !isDateAvailable;
 
   const galleryImages =
     listing.images.length > 0 ? listing.images : [];
@@ -396,6 +402,12 @@ export function ListingDetailSheet({
             {formatPlural(listing.minNights, "night")}. Extend your window by{" "}
             {listing.minNights - requestedNights}{" "}
             {formatPlural(listing.minNights - requestedNights, "night")} to book.
+          </p>
+        ) : null}
+
+        {isBlockedByHost ? (
+          <p className="rounded-xl bg-warning-soft px-3 py-2 text-xs text-warning">
+            The selected dates overlap with days blocked by the host. Please choose alternate dates.
           </p>
         ) : null}
 

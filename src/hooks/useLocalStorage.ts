@@ -130,6 +130,15 @@ export function useLocalStorage<T>(
           const message = event.data;
           if (!message || message.key !== key) return;
           if (message.senderId === senderIdRef.current) return;
+
+          const validator = validateRef.current;
+          if (validator && !validator(message.payload)) {
+            console.warn(
+              `[useLocalStorage] rejected invalid broadcast for "${key}"`,
+            );
+            return;
+          }
+
           valueRef.current = message.payload;
           setStoredValue(message.payload);
         };

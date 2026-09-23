@@ -221,8 +221,8 @@ export function SliderDual({
       tabIndex={disabled ? -1 : 0}
       aria-label={ariaLabel}
       aria-orientation="horizontal"
-      aria-valuemin={min}
-      aria-valuemax={max}
+      aria-valuemin={thumb === "min" ? min : minValue + gap}
+      aria-valuemax={thumb === "min" ? maxValue - gap : max}
       aria-valuenow={currentValue}
       aria-valuetext={formatValue ? formatValue(currentValue) : String(currentValue)}
       aria-disabled={disabled || undefined}

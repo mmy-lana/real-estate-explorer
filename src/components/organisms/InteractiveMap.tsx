@@ -155,7 +155,7 @@ export function InteractiveMap({
           size.width,
           size.height,
         );
-        return nextEngine.panBy(-deltaX, -deltaY);
+        return nextEngine.panBy(-deltaX, deltaY);
       });
     },
     [size.height, size.width],
@@ -177,17 +177,27 @@ export function InteractiveMap({
     [engine, onBoundsChange, onInteractionChange],
   );
 
-  const handleWheel = useCallback(
-    (event: React.WheelEvent<HTMLDivElement>) => {
+  // Wheel zoom must call `preventDefault()`, but React registers its synthetic
+  // wheel handler as a passive root listener, which makes that call a no-op and
+  // logs a console warning. A native non-passive listener is registered instead.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || !isReady) return;
+
+    const handleWheel = (event: WheelEvent): void => {
       event.preventDefault();
-      const rect = event.currentTarget.getBoundingClientRect();
+      const rect = container.getBoundingClientRect();
       const anchorX = event.clientX - rect.left;
       const anchorY = event.clientY - rect.top;
       const factor = event.deltaY < 0 ? 1.18 : 1 / 1.18;
       applyViewport(engine.zoomTo(factor, anchorX, anchorY));
-    },
-    [applyViewport, engine],
-  );
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+    };
+  }, [applyViewport, containerRef, engine, isReady]);
 
   // Pinch zoom for touch devices (two-pointer distance ratio).
   const handleTouchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
@@ -339,7 +349,6 @@ export function InteractiveMap({
           onPointerMove={handlePointerMove}
           onPointerUp={endPan}
           onPointerCancel={endPan}
-          onWheel={handleWheel}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}

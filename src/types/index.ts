@@ -315,8 +315,9 @@ export function isValidGeoBounds(value: unknown): value is GeoBounds {
     south >= VALIDATION_LIMITS.MIN_COORDINATES.lat &&
     north > south &&
     east <= VALIDATION_LIMITS.MAX_COORDINATES.lng &&
-    west >= VALIDATION_LIMITS.MIN_COORDINATES.lng &&
-    east >= west
+    east >= VALIDATION_LIMITS.MIN_COORDINATES.lng &&
+    west <= VALIDATION_LIMITS.MAX_COORDINATES.lng &&
+    west >= VALIDATION_LIMITS.MIN_COORDINATES.lng
   );
 }
 

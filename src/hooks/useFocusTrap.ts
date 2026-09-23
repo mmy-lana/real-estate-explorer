@@ -121,28 +121,40 @@ export function useFocusTrap<T extends HTMLElement>(
   }, [active, containerRef, restoreFocus]);
 }
 
+let activeScrollLocks = 0;
+let originalBodyOverflow = "";
+let originalBodyPaddingRight = "";
+
 /**
- * Locks body scrolling while `active`, compensating for the scrollbar width so
- * the page behind the overlay does not shift horizontally.
+ * Reference-counted body scroll lock. Prevents premature unlocking when
+ * multiple modal overlays or bottom sheets mount concurrently.
  */
 export function useScrollLock(active: boolean): void {
   useEffect(() => {
     if (!active || typeof document === "undefined") return;
 
     const { body } = document;
-    const previousOverflow = body.style.overflow;
-    const previousPaddingRight = body.style.paddingRight;
-    const scrollbarWidth =
-      window.innerWidth - document.documentElement.clientWidth;
+    if (activeScrollLocks === 0) {
+      originalBodyOverflow = body.style.overflow;
+      originalBodyPaddingRight = body.style.paddingRight;
 
-    body.style.overflow = "hidden";
-    if (scrollbarWidth > 0) {
-      body.style.paddingRight = `${scrollbarWidth}px`;
+      const scrollbarWidth =
+        window.innerWidth - document.documentElement.clientWidth;
+
+      body.style.overflow = "hidden";
+      if (scrollbarWidth > 0) {
+        body.style.paddingRight = `${scrollbarWidth}px`;
+      }
     }
 
+    activeScrollLocks += 1;
+
     return () => {
-      body.style.overflow = previousOverflow;
-      body.style.paddingRight = previousPaddingRight;
+      activeScrollLocks = Math.max(0, activeScrollLocks - 1);
+      if (activeScrollLocks === 0) {
+        body.style.overflow = originalBodyOverflow;
+        body.style.paddingRight = originalBodyPaddingRight;
+      }
     };
   }, [active]);
 }
